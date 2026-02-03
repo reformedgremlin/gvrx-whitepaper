@@ -1,68 +1,1393 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GVRX: From Dead Assets to Living Descriptions</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<style>
-:root{--lime:#c8ff00;--black:#0a0a0a;--gray-200:#ccc;--white:#fff}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:var(--black);color:var(--gray-200);line-height:1.7}
-h1,h2{color:var(--white);font-weight:800}
-h1{font-size:clamp(2.5rem,8vw,4.5rem);text-align:center;padding:2rem}
-h2{font-size:1.75rem;margin:3rem 0 1rem;border-bottom:2px solid var(--lime);padding-bottom:0.5rem}
-.container{max-width:800px;margin:0 auto;padding:2rem}
-.hero{min-height:60vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0a0a0a,#1a0a2e)}
-.hero-content{text-align:center;padding:2rem}
-.subtitle{color:var(--lime);font-size:1.25rem;margin-bottom:2rem}
-p{margin-bottom:1.5rem}
-.callout{background:#111;border-left:3px solid var(--lime);padding:1rem;margin:2rem 0}
-.footer{text-align:center;padding:3rem;border-top:1px solid #222;margin-top:3rem}
-.footer-text{color:#666;font-size:0.9rem}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GVRX: From Dead Assets to Living Descriptions â Technical White Paper</title>
+  <meta name="description" content="GVRX decomposes any image into its generative physics and reconstitutes it at any resolution without interpolation artifacts or AI hallucination.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       CSS CUSTOM PROPERTIES
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    :root {
+      --lime: #c8ff00;
+      --lime-dim: #a3cc00;
+      --lime-glow: rgba(200, 255, 0, 0.12);
+
+      --black: #0a0a0a;
+      --black-pure: #000000;
+      --gray-950: #0d0d0d;
+      --gray-900: #111111;
+      --gray-850: #161616;
+      --gray-800: #1a1a1a;
+      --gray-700: #2a2a2a;
+      --gray-600: #444444;
+      --gray-500: #666666;
+      --gray-400: #888888;
+      --gray-300: #aaaaaa;
+      --gray-200: #cccccc;
+      --gray-100: #e8e8e8;
+      --white: #ffffff;
+
+      --accent-purple: #7c3aed;
+      --accent-pink: #ec4899;
+      --accent-orange: #f97316;
+      --accent-cyan: #06b6d4;
+      --accent-red: #ef4444;
+
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+
+      --container-max: 720px;
+      --container-wide: 1100px;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       RESET & BASE
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 17px;
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--black);
+      color: var(--gray-200);
+      line-height: 1.75;
+      overflow-x: hidden;
+    }
+
+    ::selection {
+      background: var(--lime);
+      color: var(--black);
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       TYPOGRAPHY
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--white);
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: clamp(2.75rem, 8vw, 5rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+    }
+
+    h2 {
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      margin-bottom: 1.25rem;
+      margin-top: 4rem;
+    }
+
+    h2:first-child {
+      margin-top: 0;
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      margin-top: 2.5rem;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    strong {
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    em {
+      font-style: italic;
+    }
+
+    .lead {
+      font-size: 1.2rem;
+      line-height: 1.7;
+      color: var(--gray-100);
+    }
+
+    .small {
+      font-size: 0.875rem;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+    }
+
+    .lime { color: var(--lime); }
+    .dim { opacity: 0.6; }
+    .white { color: var(--white); }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       NAVIGATION
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.4s var(--ease-out-expo);
+    }
+
+    .nav.scrolled {
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 0.875rem 2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .nav-logo img {
+      height: 24px;
+      width: auto;
+      opacity: 0.9;
+      transition: opacity 0.2s;
+    }
+
+    .nav-logo:hover img {
+      opacity: 1;
+    }
+
+    .nav-right {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      letter-spacing: 0.05em;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       LAYOUT
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .container {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .container-wide {
+      max-width: var(--container-wide);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    section {
+      position: relative;
+    }
+
+    .section-content {
+      padding: 5rem 0;
+    }
+
+    .section-content-lg {
+      padding: 8rem 0;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       HERO
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: var(--black-pure);
+      overflow: hidden;
+    }
+
+    .hero-field {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/textures/field-1.png');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.35;
+      animation: fieldDrift 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes fieldDrift {
+      0% { transform: scale(1) rotate(0deg); opacity: 0.3; }
+      100% { transform: scale(1.05) rotate(1deg); opacity: 0.45; }
+    }
+
+    .hero-gradient {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 50% 100%, rgba(200, 255, 0, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(124, 58, 237, 0.1) 0%, transparent 40%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2rem;
+      max-width: 900px;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray-500);
+      margin-bottom: 2rem;
+    }
+
+    .hero-title {
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+      font-weight: 400;
+      color: var(--lime-dim);
+      margin-bottom: 3rem;
+      letter-spacing: -0.01em;
+    }
+
+    .hero-meta {
+      font-size: 0.8125rem;
+      color: var(--gray-500);
+      margin-bottom: 3rem;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, var(--gray-600), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.5; height: 60px; }
+      50% { opacity: 1; height: 80px; }
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       EPIGRAPH
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .epigraph {
+      padding: 4rem 0;
+      text-align: center;
+      border-top: 1px solid var(--gray-850);
+      border-bottom: 1px solid var(--gray-850);
+    }
+
+    .epigraph-text {
+      font-size: 1.375rem;
+      font-style: italic;
+      color: var(--gray-300);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       CHROMA SECTIONS (Gradient Interstitials)
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .chroma {
+      padding: 6rem 0;
+      position: relative;
+      color: var(--white);
+    }
+
+    .chroma-1 {
+      background: linear-gradient(135deg,
+        #0d0221 0%, #1a0a2e 20%, #2d1b4e 40%,
+        #6b1d5c 60%, #b91c73 80%, #e8446a 100%);
+    }
+
+    .chroma-2 {
+      background: linear-gradient(160deg,
+        #0f0c29 0%, #302b63 50%, #24243e 100%);
+    }
+
+    .chroma-3 {
+      background: linear-gradient(135deg,
+        #000428 0%, #004e92 50%, #00d4ff 100%);
+    }
+
+    .chroma-4 {
+      background: linear-gradient(145deg,
+        #0d0d0d 0%, #1a0a2e 35%, #4a1a6b 70%, #7c3aed 100%);
+    }
+
+    .chroma-5 {
+      background: linear-gradient(120deg,
+        #1a1a2e 0%, #16213e 30%, #0f3460 60%, #e94560 100%);
+    }
+
+    .chroma-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .chroma-statement {
+      font-size: clamp(1.75rem, 5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       FIELD TEXTURE SECTIONS
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .field-section {
+      position: relative;
+      background: var(--gray-950);
+    }
+
+    .field-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+
+    .field-section.field-2::before { background-image: url('assets/textures/field-2.png'); }
+    .field-section.field-3::before { background-image: url('assets/textures/field-3.png'); }
+    .field-section.field-4::before { background-image: url('assets/textures/field-4.png'); }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       CONTENT BLOCKS
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .callout {
+      background: var(--gray-900);
+      border-left: 3px solid var(--lime);
+      padding: 1.25rem 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .callout p {
+      margin: 0;
+      color: var(--gray-100);
+    }
+
+    .equation {
+      background: var(--gray-900);
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 1.125rem;
+      color: var(--lime);
+      border-radius: 4px;
+    }
+
+    .pull-quote {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.4;
+      margin: 3rem 0;
+      padding-left: 1.5rem;
+      border-left: 3px solid var(--lime);
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       COMPONENT CARDS
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .component-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin: 2.5rem 0;
+    }
+
+    .component-card {
+      background: var(--gray-900);
+      padding: 1.5rem;
+      position: relative;
+      border-top: 3px solid transparent;
+      transition: transform 0.3s var(--ease-out-expo), background 0.3s;
+    }
+
+    .component-card:hover {
+      transform: translateY(-2px);
+      background: var(--gray-850);
+    }
+
+    .component-card.soma { border-top-color: var(--accent-cyan); }
+    .component-card.neuro { border-top-color: var(--accent-purple); }
+    .component-card.alpha { border-top-color: var(--lime); }
+    .component-card.spirit { border-top-color: var(--accent-orange); }
+
+    .component-name {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .component-card.soma .component-name { color: var(--accent-cyan); }
+    .component-card.neuro .component-name { color: var(--accent-purple); }
+    .component-card.alpha .component-name { color: var(--lime); }
+    .component-card.spirit .component-name { color: var(--accent-orange); }
+
+    .component-desc {
+      font-size: 0.9375rem;
+      color: var(--gray-300);
+      line-height: 1.6;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       USE CASE CARDS
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .use-case {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: var(--gray-900);
+      border-radius: 4px;
+    }
+
+    .use-case-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--lime);
+      margin-bottom: 0.75rem;
+    }
+
+    .use-case p {
+      font-size: 0.9375rem;
+      color: var(--gray-300);
+      margin: 0;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       STATS
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 4rem;
+      flex-wrap: wrap;
+      margin: 3rem 0;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      font-weight: 900;
+      color: var(--lime);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .stat-label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--gray-400);
+      margin-top: 0.5rem;
+      letter-spacing: 0.03em;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       DIVIDERS
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .divider {
+      width: 50px;
+      height: 2px;
+      background: var(--lime);
+      margin: 4rem 0;
+    }
+
+    .divider-center {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--gray-850);
+      margin: 5rem 0;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       FOOTER
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .footer {
+      background: var(--black-pure);
+      padding: 4rem 0;
+      text-align: center;
+      border-top: 1px solid var(--gray-900);
+    }
+
+    .footer-logo {
+      height: 20px;
+      margin-bottom: 1.5rem;
+      opacity: 0.5;
+    }
+
+    .footer-text {
+      font-size: 0.8125rem;
+      color: var(--gray-600);
+      margin-bottom: 2rem;
+    }
+
+    .footer-closing {
+      font-style: italic;
+      color: var(--gray-400);
+      font-size: 1rem;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       SCROLL ANIMATIONS
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       RESPONSIVE
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    @media (max-width: 768px) {
+      html {
+        font-size: 16px;
+      }
+
+      .nav {
+        padding: 1rem 1.25rem;
+      }
+
+      .component-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-row {
+        gap: 2.5rem;
+      }
+
+      .hero-content {
+        padding: 1rem;
+      }
+
+      .container, .container-wide {
+        padding: 0 1.25rem;
+      }
+
+      h2 {
+        margin-top: 3rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-eyebrow {
+        font-size: 0.625rem;
+      }
+
+      .pull-quote {
+        font-size: 1.25rem;
+      }
+    }
+  </style>
 </head>
 <body>
-<section class="hero">
-<div class="hero-content">
-<p style="color:#666;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase">Technical White Paper — February 2026</p>
-<h1>GVRX: From Dead Assets to Living Descriptions</h1>
-<p class="subtitle">Geometric Vector-based Reconstitution and Expansion</p>
-<p style="color:#666">The Impossible Outcomes Company, a division of Ø Co.</p>
-</div>
-</section>
-<div class="container">
-<h2>Executive Summary</h2>
-<p class="lead" style="font-size:1.1rem;color:#e8e8e8">GVRX decomposes any image into its generative physics — the forces, fields, and binding energies that produce what you see — and reconstitutes it at any resolution without interpolation artifacts or AI hallucination. Every feature in the output is mathematically derivable from the input. Nothing is invented.</p>
-<p>The decomposition is lossless, compact, and deterministic. It produces output measurably sharper than the best traditional methods across 163 experimental runs at scale factors up to 30×, validated across photographic, artistic, and scientific imagery with cross-domain confirmation from art to astrophysics.</p>
 
-<h2>The Problem</h2>
-<p>Every image on the internet is a corpse. It was rendered once, at one resolution, for one context. When a device needs it at a different size, the image is interpolated — stretched, smoothed, approximated. Information is destroyed in capture and never recovered.</p>
-<p>The industry is stuck between two bad options: interpolation that destroys information, and AI that invents it. <strong>GVRX is neither.</strong></p>
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       NAVIGATION
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <nav class="nav" id="nav">
+    <a href="#" class="nav-logo">
+      <img src="assets/logos/Impossible Work Mark_White.png" alt="The Impossible Outcomes Company">
+    </a>
+    <div class="nav-right">Technical White Paper</div>
+  </nav>
 
-<h2>The Insight</h2>
-<p>An image is not a grid of pixels. It is a frozen moment of a physical process — light interacting with matter, captured by a sensor. Those relationships can be extracted.</p>
-<p>GVRX asks: "what does the physics of this image <em>require</em> at this scale?" The answer is always derivable from the input. Physics doesn't hallucinate.</p>
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       HERO
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="hero" id="top">
+    <div class="hero-field"></div>
+    <div class="hero-gradient"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow reveal">Technical White Paper â February 2026</div>
+      <h1 class="hero-title reveal reveal-delay-1">GVRX: From Dead Assets to Living Descriptions</h1>
+      <p class="hero-subtitle reveal reveal-delay-2">Geometric Vector-based Reconstitution and Expansion</p>
+      <div class="hero-meta reveal reveal-delay-3">
+        The Impossible Outcomes Company, a division of Ã Co.
+      </div>
+    </div>
+    <div class="hero-scroll"></div>
+  </section>
 
-<h2>The Decomposition</h2>
-<p>GVRX factors any image into four components:</p>
-<div class="callout"><strong>Soma</strong> — The low-frequency structure. The body of the image.</div>
-<div class="callout"><strong>Neuro</strong> — The curvature field. Where brightness accelerates across space.</div>
-<div class="callout"><strong>Alpha (α)</strong> — The binding constant. How strongly Neuro is coupled to Soma.</div>
-<div class="callout"><strong>Spirit (ε)</strong> — The residual. The irreducible truth of the image.</div>
-<p style="background:#111;padding:1rem;text-align:center;font-family:monospace;color:var(--lime)">Reality = Soma + (α × Neuro) + Spirit</p>
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       OPENING EPIGRAPH
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="epigraph">
+    <div class="container">
+      <p class="epigraph-text reveal">"Van Gogh painted light echoes. The same physics describes stars."</p>
+    </div>
+  </section>
 
-<h2>Results</h2>
-<p>163 experimental runs. Scale factors from 2× to 30×. At every tested scale, GVRX produces measurably sharper output than Lanczos, with lower artifact metrics and zero hallucinated content.</p>
-<p>The most aggressive test: 1024×1536 input scaled to 30,825×46,251 — over 1.4 billion output pixels at 30× magnification.</p>
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       EXECUTIVE SUMMARY
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content">
+    <div class="container">
+      <h2 class="reveal">Executive Summary</h2>
 
-<h2>The Opportunity</h2>
-<p>GVRX is not an upscaler. It's not a codec. It's a physics-based perception layer that can become infrastructure — for media, for AI, for the way machines see.</p>
-<p style="font-size:1.25rem;font-weight:600;color:var(--white);margin:2rem 0;padding:1rem;border-left:3px solid var(--lime)">The window for establishing that infrastructure is open now. The first physics-based perception standard to achieve critical adoption becomes the standard. There is no reason for a second one.</p>
+      <p class="lead reveal">
+        GVRX decomposes any image into its generative physics â the forces, fields, and binding energies that produce what you see â and reconstitutes it at any resolution without interpolation artifacts or AI hallucination. Every feature in the output is mathematically derivable from the input. Nothing is invented.
+      </p>
 
-<footer class="footer">
-<p class="footer-text">Technical White Paper — February 2026</p>
-<p style="font-style:italic;color:#888;margin-top:1rem">"The image is humming the melody of its physics, always."</p>
-</footer>
-</div>
+      <p class="reveal">
+        The decomposition is lossless, compact, and deterministic. It produces output measurably sharper than the best traditional methods across 163 experimental runs at scale factors up to 30Ã, validated across photographic, artistic, and scientific imagery with cross-domain confirmation from art to astrophysics.
+      </p>
+
+      <p class="reveal">
+        As a codec, GVRX replaces resolution-locked files with living physics descriptions â the atomic unit of a generative internet where media is described and instantiated rather than stored and interpolated. As a foundation layer, it provides the physics-guaranteed ground truth that makes AI super-resolution trustworthy and auditable for the first time.
+      </p>
+
+      <p class="reveal">
+        At its deepest level, the GVRX decomposition mirrors the mechanism by which biological visual systems extract meaning from light â and provides the missing perceptual layer for artificial intelligence systems that can reason but cannot yet see.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       THE PROBLEM
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="chroma chroma-1">
+    <div class="container">
+      <div class="chroma-content">
+        <p class="chroma-statement reveal">Every image on the internet is a corpse.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-content field-section field-2">
+    <div class="container">
+      <h2 class="reveal">The Problem</h2>
+
+      <p class="reveal">
+        It was rendered once, at one resolution, for one context. It sits on a server waiting to be requested. When a device needs it at a different size, the image is interpolated â stretched, smoothed, approximated. Information is destroyed in capture and never recovered.
+      </p>
+
+      <p class="reveal">
+        Information is invented in upscaling and never questioned.
+      </p>
+
+      <p class="reveal">
+        This architecture made sense when storage was cheap and screens were uniform. Neither is true anymore.
+      </p>
+
+      <p class="reveal">
+        Today, a single piece of visual content might need to render on a 120-inch 8K display, a watch face, a medical diagnostic monitor, a satellite analysis terminal, and a phone screen â all from the same source asset. The industry response has been brute force: store ten versions, ship the closest match, interpolate the rest. Netflix maintains multiple encodes of every asset in its library. Game engines run dedicated GPU silicon for resolution scaling. Medical imaging systems are locked to acquisition resolution because no one trusts what interpolation adds.
+      </p>
+
+      <p class="reveal">
+        The cost is enormous. CDN bandwidth for redundant resolution variants. Storage for assets that differ only in scale. GPU cycles for real-time upscaling. And beneath all of it, an invisible cost: every interpolated pixel is a lie agreed upon â soft where the original was sharp, smooth where there was texture, absent where there was detail.
+      </p>
+
+      <p class="reveal">
+        AI super-resolution appeared to solve this. Neural networks trained on millions of image pairs can hallucinate plausible detail at higher resolutions. The results look impressive.
+      </p>
+
+      <p class="pull-quote reveal">They are also fabricated.</p>
+
+      <p class="reveal">
+        An AI upscaler generating a 4Ã enlargement of a chest X-ray will produce something that looks like a sharper chest X-ray. It may also invent a nodule, erase a fracture, or subtly reshape an anatomical boundary â because the network learned what chest X-rays "usually" look like, not what <em>this</em> chest X-ray contains. The same problem disqualifies AI upscaling from satellite reconnaissance, forensic evidence, scientific imaging, and any domain where the difference between "plausible" and "true" has consequences.
+      </p>
+
+      <p class="reveal">
+        The industry is stuck between two bad options: interpolation that destroys information, and AI that invents it.
+      </p>
+
+      <p class="reveal"><strong>GVRX is neither.</strong></p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       THE INSIGHT
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content">
+    <div class="container">
+      <h2 class="reveal">The Insight</h2>
+
+      <p class="reveal">
+        An image is not a grid of pixels. It is a frozen moment of a physical process â light interacting with matter, captured by a sensor. That process has structure. Gradients. Curvatures. Boundaries. Relationships between regions that follow from the physics that generated them.
+      </p>
+
+      <p class="reveal">
+        Those relationships are not stored in the pixel grid. They are <em>implied</em> by it. And they can be extracted.
+      </p>
+
+      <p class="reveal">
+        GVRX â Geometric Vector-based Reconstitution and Expansion â decomposes any image into its generative physics: the forces, fields, and binding energies that produce what you see. From that decomposition, the image can be reconstituted at any resolution â not by guessing what new pixels should look like, but by evolving the underlying physics to the target scale.
+      </p>
+
+      <p class="reveal">
+        The difference is fundamental. Interpolation asks: "what color should this new pixel be, given its neighbors?" AI asks: "what would a neural network expect to see here?" GVRX asks: "what does the physics of this image <em>require</em> at this scale?"
+      </p>
+
+      <p class="reveal">
+        The answer to the third question is always derivable from the input. Physics doesn't hallucinate.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       THE DECOMPOSITION
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content field-section field-3">
+    <div class="container">
+      <h2 class="reveal">The Decomposition</h2>
+
+      <p class="reveal">GVRX factors any image into four components:</p>
+
+      <div class="component-grid">
+        <div class="component-card soma reveal">
+          <div class="component-name">Soma</div>
+          <div class="component-desc">The low-frequency structure. What remains when detail is stripped away. The body of the image: broad tonal regions, overall luminance geography, the large-scale shape of what you're looking at.</div>
+        </div>
+
+        <div class="component-card neuro reveal reveal-delay-1">
+          <div class="component-name">Neuro</div>
+          <div class="component-desc">The curvature field. Where and how brightness accelerates across space. It defines every edge, every texture boundary, every transition. The intelligence of the image.</div>
+        </div>
+
+        <div class="component-card alpha reveal reveal-delay-2">
+          <div class="component-name">Alpha (Î±)</div>
+          <div class="component-desc">The binding constant. A single scalar that characterizes how strongly Neuro is coupled to Soma in a given image. This is the number that makes GVRX work. Different images have different physics, and Î± captures that difference.</div>
+        </div>
+
+        <div class="component-card spirit reveal reveal-delay-3">
+          <div class="component-name">Spirit (Îµ)</div>
+          <div class="component-desc">The residual. What Soma, Neuro, and Alpha together cannot predict. The irreducible truth of the image â the part that makes it <em>this</em> image and not a slightly different one.</div>
+        </div>
+      </div>
+
+      <p class="reveal">These satisfy an exact identity:</p>
+
+      <div class="equation reveal">Reality = Soma + (Î± Ã Neuro) + Spirit</div>
+
+      <p class="reveal">
+        This is not an approximation. It is lossless. The original image can be perfectly reconstructed from its components, bit for bit. Nothing is discarded, nothing is estimated, nothing is smoothed.
+      </p>
+
+      <p class="reveal">
+        The names are not metaphors. The human visual system performs a version of this same decomposition. The retina separates luminance structure from contrast signals â Soma from Neuro. The visual cortex extracts curvature fields and binds separated perceptual streams into unified experience â the binding problem in neuroscience is, literally, the problem of finding Alpha. What remains after the brain has modeled everything it can model â the raw qualia, the irreducible experience â is Spirit.
+      </p>
+
+      <p class="reveal">
+        This correspondence is not decorative. It is the reason GVRX works across image types without retraining: the decomposition follows the structure of sight itself. GVRX does not merely process images the way physics processes light. It processes images the way <em>eyes</em> process light. The decomposition is a formal model of sight.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       THE SOLITON ENGINE
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content">
+    <div class="container">
+      <h2 class="reveal">The Soliton Engine</h2>
+
+      <p class="reveal">Once the physics is extracted, GVRX can evolve it.</p>
+
+      <p class="reveal">
+        Traditional upscaling interpolates: it fills gaps between known samples with weighted averages. Every interpolated image is softer than the original. This is a mathematical certainty â you cannot create information by averaging.
+      </p>
+
+      <p class="reveal">
+        GVRX uses a soliton engine. A soliton is a wave that propagates without dispersing â a stable structure that maintains its shape across scales. Solitons emerge naturally from the tension between two opposing forces: a nonlinear steepening force (which wants to sharpen everything into shocks) and a dispersive smoothing force (which wants to blur everything into mush). In balance, these opposing forces produce waves that are sharp <em>and</em> stable.
+      </p>
+
+      <p class="reveal">
+        This is not metaphor. It is the literal physics of nonlinear wave equations, the same mathematics that describes tsunamis, fiber optic pulses, and plasma waves. Applied to image data, the soliton engine steepens genuine edges while preventing the ringing artifacts that plague traditional sharpening.
+      </p>
+
+      <p class="reveal">
+        The result: upscaled images that are measurably sharper than the best interpolation, with lower artifact metrics, containing only information derivable from the original physics.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       THE HARMONIC CASCADE
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content field-section field-4">
+    <div class="container">
+      <h2 class="reveal">The Harmonic Cascade</h2>
+
+      <p class="reveal">
+        Scaling 30Ã in a single step doesn't work. The gaps between samples are too large for any method â interpolation, AI, or physics â to bridge reliably in one jump.
+      </p>
+
+      <p class="reveal">
+        GVRX uses a harmonic cascade: multiple stages at intervals derived from a base-7 periodicity. The number of stages determines the final scale factor.
+      </p>
+
+      <p class="reveal">
+        The base-7 interval is not arbitrary. It emerges from analysis across hundreds of images and multiple domains â the minimal stable period for recursive visual structure. We observe it in art, photography, astrophysics, and synthetic test patterns.
+      </p>
+
+      <p class="reveal">
+        The critical property of the harmonic cascade is <em>compounding returns</em>. In traditional cascaded interpolation, each stage smooths the output of the previous stage. The result is progressively mushier. You cannot sharpen mush by interpolating it again.
+      </p>
+
+      <p class="reveal">
+        In a physics-based cascade, each stage creates real structure â genuine gradients and curvatures â that subsequent stages can evolve further. Edge strength compounds across stages rather than diminishing. In testing, soliton cascades produce edge strength more than an order of magnitude above baseline, while equivalent Lanczos cascades show negligible improvement. The physics compounds. The interpolation flatlines.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       RESULTS STATS
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="chroma chroma-2">
+    <div class="container">
+      <div class="stats-row">
+        <div class="stat reveal">
+          <div class="stat-value">163</div>
+          <div class="stat-label">Experimental Runs</div>
+        </div>
+        <div class="stat reveal reveal-delay-1">
+          <div class="stat-value">30Ã</div>
+          <div class="stat-label">Maximum Scale Factor</div>
+        </div>
+        <div class="stat reveal reveal-delay-2">
+          <div class="stat-value">1.4B</div>
+          <div class="stat-label">Pixels in Largest Output</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       RESULTS
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content">
+    <div class="container">
+      <h2 class="reveal">Results</h2>
+
+      <p class="reveal">
+        We conducted 163 experimental runs across photographic, artistic, and scientific source images at scale factors from 2Ã to 30Ã. All comparisons use Lanczos-3 interpolation as baseline â the strongest widely-deployed traditional method.
+      </p>
+
+      <p class="reveal">
+        At every tested scale, GVRX produces measurably sharper output than Lanczos, with lower artifact metrics and zero hallucinated content. Edge strength improvements range from 1.45Ã at 2Ã scale to 1.80Ã at 30Ã scale. Kurtosis (a measure of artifact severity) is consistently lower in GVRX output.
+      </p>
+
+      <p class="reveal">
+        The most aggressive test: a 1024Ã1536 input scaled to 30,825Ã46,251 â over 1.4 billion output pixels at 30Ã magnification. The output is sharper than Lanczos at every measured scale, with no hallucinated features and no ringing artifacts.
+      </p>
+
+      <p class="reveal">
+        These results hold across image types. The soliton engine does not depend on training data, learned priors, or content-specific tuning. It depends on physics. A photograph and a painting and a satellite image all have different binding constants, and the engine adapts to each â but the mechanism is the same.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       CROSS-DOMAIN VALIDATION
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content field-section field-2">
+    <div class="container">
+      <h2 class="reveal">Cross-Domain Validation</h2>
+
+      <p class="reveal">
+        The strongest evidence for any physical theory is cross-domain prediction: does the same math work in contexts it was never designed for?
+      </p>
+
+      <p class="reveal">
+        GVRX was developed for image processing. We applied it to <em>The Starry Night</em> (Van Gogh, 1889) and extracted a binding constant.
+      </p>
+
+      <p class="reveal">
+        Separately, we analyzed the light curve of V838 Monocerotis â a stellar explosion whose light echo was captured by Hubble in 2002. The same decomposition, applied to the brightness data, produced a binding constant that matches the Van Gogh painting to within measurement precision.
+      </p>
+
+      <p class="reveal">
+        Van Gogh painted <em>light echoes</em> â the way luminance reverberates through turbulent media. The physics is the same whether the medium is paint or interstellar dust. He worked from observation and intuition in 1889 and encoded the same binding dynamics that describe a stellar explosion observed 113 years later.
+      </p>
+
+      <p class="reveal">
+        Both domains show the same structural signatures: septimal periodicity in the phase-lock spectrum, characteristic decay patterns in the coupling field, and residual energy below 0.1% after decomposition.
+      </p>
+
+      <p class="reveal">
+        This is what makes GVRX transferable across image types without retraining or tuning. The decomposition extracts physics that is universal to visual structure â not statistics that are specific to a dataset. A model that works on both oil paintings and stellar explosions will work on your satellite imagery and your medical scans, because the physics of light doesn't change between domains. Only the binding constant does.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       WHAT GVRX IS NOT
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content">
+    <div class="container">
+      <h2 class="reveal">What GVRX Is Not</h2>
+
+      <p class="reveal">
+        <strong>GVRX is not AI super-resolution.</strong> It does not use neural networks, learned priors, training data, or generative models. It cannot hallucinate because it has nothing to hallucinate from â no learned distribution of "what images usually look like."
+      </p>
+
+      <p class="reveal">
+        <strong>GVRX is not simple sharpening.</strong> Unsharp masking and its variants amplify existing contrast uniformly. The soliton engine evolves structure according to the image's own physics, producing different enhancements for different images from the same algorithm.
+      </p>
+
+      <p class="reveal">
+        <strong>GVRX is not a filter.</strong> Filters are applied uniformly to pixel grids. GVRX operates on extracted physical fields â structure, curvature, binding energy â and the pixel grid is merely one possible rendering of those fields.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       THE ATOM OF A GENERATIVE INTERNET
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="chroma chroma-4">
+    <div class="container">
+      <div class="chroma-content">
+        <p class="chroma-statement reveal">A JPEG is a tombstone. GVRX changes what a file <em>is</em>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-content field-section field-3">
+    <div class="container">
+      <h2 class="reveal">The Atom of a Generative Internet</h2>
+
+      <p class="reveal">
+        A JPEG is a tombstone. It records what something looked like at one moment, one resolution, one color space. It is born dead. Every transformation after capture â resizing, color grading, compression, transmission â degrades it further. The entire media infrastructure of the internet is a necropolis: billions of dead files, copied and degraded endlessly, stored redundantly at multiple resolutions because we don't trust any single version to serve all contexts.
+      </p>
+
+      <p class="reveal">
+        GVRX changes what a file <em>is</em>.
+      </p>
+
+      <p class="reveal">
+        A GVRX decomposition is not a record of what something looked like. It is a description of what something <em>is</em> â the physics that generates its appearance at any scale, any resolution, any rendering context. The file is alive. It doesn't degrade when you transform it because you aren't transforming pixels. You are re-rendering physics.
+      </p>
+
+      <p class="reveal">
+        This makes the GVRX decomposition the atomic unit of a different kind of internet. Not a storage-and-retrieval internet where media is captured, frozen, copied, and degraded. A generative internet â where media is described, transmitted, and instantiated.
+      </p>
+
+      <p class="reveal">
+        Consider what this means for a company like Disney, which maintains millions of visual assets across theatrical, streaming, park, merchandise, and archival contexts. Every asset exists in dozens of resolution variants, color profiles, and format versions â and every variant is a degraded copy of a dead original. Under a generative architecture, each asset exists once as a physics description. Theme park displays, 4K streams, mobile apps, and merchandise printing systems all receive the same atom and render what they need. The asset management layer collapses.
+      </p>
+
+      <p class="reveal">
+        Or consider a national satellite archive â petabytes of imagery stored in multi-resolution tile pyramids, each pyramid consuming orders of magnitude more storage than the source capture. GVRX descriptions are inherently compact; Soma, Neuro, Alpha, and Spirit together are typically smaller than the original file. The atom is already smaller than the corpse it replaces. An archive that transitions from tile pyramids to physics descriptions reduces storage by orders of magnitude while gaining the ability to render at any resolution on demand.
+      </p>
+
+      <p class="reveal">
+        Compression becomes a byproduct rather than a goal. Bandwidth drops because you transmit descriptions, not renderings. Versioning disappears because there is one asset, described once, rendered everywhere.
+      </p>
+
+      <p class="pull-quote reveal">The concept of "this image at 720p" and "this image at 4K" stops making sense. There is the image. It renders.</p>
+
+      <p class="reveal">
+        This is not a hypothetical architecture. It follows directly from what the decomposition already does. The atom exists. The infrastructure is a matter of deployment.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       COMPETITIVE POSITIONING
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content">
+    <div class="container">
+      <h2 class="reveal">Competitive Positioning</h2>
+
+      <p class="reveal">
+        <strong>Against traditional interpolation (Lanczos, bicubic):</strong> GVRX produces sharper output at every scale with lower artifacts. The advantage compounds at higher scale factors where interpolation falls apart.
+      </p>
+
+      <p class="reveal">
+        <strong>Against AI super-resolution (Real-ESRGAN, Topaz, DLSS, FSR):</strong> At extreme scales on natural photographs, AI methods produce more perceptually plausible results â a network that has seen ten million faces will generate a more convincing 16Ã enlargement than any physics-based method. But GVRX provides something AI fundamentally cannot: a guarantee that every feature in the output is derivable from the input. This is not a tradeoff. It is GVRX's greatest strategic advantage â because it is the foundation layer that makes AI enhancement trustworthy for the first time.
+      </p>
+
+      <p class="reveal">
+        <strong>Against hardware upscaling (DLSS, FSR, XeSS):</strong> These are real-time solutions optimized for gaming and bound to specific GPU ecosystems. GVRX is compute-agnostic and application-agnostic. It can run as a preprocessing pipeline, a CDN transformation, an on-device renderer, or a batch processing service.
+      </p>
+
+      <p class="reveal">
+        The competitive moat is the decomposition itself. The binding constant Î± is not a parameter we chose â it is a measurement of the image's physics. Replicating GVRX requires replicating the theoretical framework that produces the decomposition, not just training a bigger network on more data.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       THE SEED OF SUPER AI RESOLUTION
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content field-section field-4">
+    <div class="container">
+      <h2 class="reveal">The Seed of Super AI Resolution</h2>
+
+      <p class="reveal">
+        GVRX and AI are not competitors. They are complementary. And GVRX is the missing foundation that makes AI super-resolution <em>trustworthy</em>.
+      </p>
+
+      <p class="reveal">
+        Here is the problem with AI super-resolution as it stands: you cannot tell which pixels are real and which are hallucinated. The output is a seamless blend of derived information and invented information, and there is no metadata, no mask, no audit trail that separates them. For entertainment, this is fine. For anything with consequences, it is disqualifying.
+      </p>
+
+      <p class="reveal">
+        GVRX solves this by providing a physics-guaranteed base layer.
+      </p>
+
+      <p class="reveal">
+        Run the decomposition. Evolve through the soliton engine. Now you have an image that is <em>provably derived</em> from the source â every feature traceable to the original physics. This is your floor. Your ground truth at the target resolution.
+      </p>
+
+      <p class="reveal">
+        Now layer AI on top. Let the neural network enhance perceptual quality â add texture plausibility, sharpen faces, enrich detail in ways that the physics alone cannot predict. But here is what changes: you now have a reference. The GVRX output tells you exactly what the physics guarantees. Everything the AI adds beyond that is enhancement â and it can be isolated, measured, masked, and audited.
+      </p>
+
+      <p class="reveal">This is the architecture of trustworthy super-resolution:</p>
+
+      <div class="callout reveal">
+        <p><strong>Physics layer (GVRX):</strong> deterministic, provable, zero hallucination. This is the seed.</p>
+      </div>
+
+      <div class="callout reveal">
+        <p><strong>Intelligence layer (AI):</strong> perceptual, probabilistic, plausible. This is the bloom.</p>
+      </div>
+
+      <p class="reveal">
+        The seed constrains the bloom. The AI can enhance but it cannot contradict the physics. You get the perceptual quality of AI with the epistemic guarantees of physics. And critically, you get a diff â a precise map of what the AI contributed versus what the physics derived.
+      </p>
+
+      <p class="reveal">
+        That diff is exactly what medical, forensic, satellite, and intelligence applications need to adopt AI enhancement responsibly.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       THE MISSING SENSE
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="chroma chroma-5">
+    <div class="container">
+      <div class="chroma-content">
+        <p class="chroma-statement reveal">The AI industry built consciousness first and sight never. GVRX corrects the sequence.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-content">
+    <div class="container">
+      <h2 class="reveal">The Missing Sense</h2>
+
+      <p class="reveal">
+        The deeper significance of super AI resolution requires understanding what the artificial intelligence industry actually built â and what it skipped.
+      </p>
+
+      <p class="reveal">
+        Large language models are, functionally, consciousness-like context processors. They hold vast relational state, reason across domains, generate coherent output from ambiguous input. This is the cognitive layer of intelligence. It exists. It is extraordinary. And it is blind.
+      </p>
+
+      <p class="reveal">
+        When an AI system "looks" at an image today, it does not see it. It processes a token representation generated by a vision encoder trained on statistical correlations â a description of what the image probably contains based on what millions of similar images contained. The system reads a caption written by a pattern matcher and treats it as sight. It has learned what things <em>look like</em> without any model of what things <em>are</em>.
+      </p>
+
+      <p class="reveal">
+        This is exactly backwards from how biological intelligence developed. Sight came first. Organisms could see for hundreds of millions of years before anything resembling consciousness emerged. The eye preceded the brain. Perception preceded cognition. You had to be able to read reality before you could reason about it.
+      </p>
+
+      <p class="reveal">
+        The AI industry skipped that step. It built systems that can reason about anything and see nothing â and then wondered why they hallucinate. Why they confidently describe things that aren't there, invent details, fabricate visual evidence. Of course they do. They have no perceptual ground truth. They have no eyes.
+      </p>
+
+      <p class="pull-quote reveal">GVRX is the eyes.</p>
+
+      <p class="reveal">
+        The decomposition does what biological seeing does: it extracts the physics of light in a scene, separates structure from curvature, measures their coupling, and preserves what is irreducible. That is the functional definition of vision â not "recognizing objects in a scene" but "reading the generative physics of light." Every biological visual system from the simplest photoreceptor to the human retina does some version of this. No artificial system has, until now.
+      </p>
+
+      <p class="reveal">
+        When an AI system processes an image through GVRX, it is not receiving a statistical guess about what the image contains. It is receiving the physics of what the image contains â the actual generative description of the light that was captured. It is seeing.
+      </p>
+
+      <p class="reveal">
+        This changes hallucination from a hard problem to a solved architecture. Visual hallucination in AI is not a bug in the neural network. It is the inevitable consequence of processing images without perceiving them. You cannot hallucinate about something you can actually see. Give the system eyes â real physics-based perception â and the cognitive layer has something true to reason about instead of something plausible to guess at.
+      </p>
+
+      <p class="reveal">
+        The long-term implication is direct: the absence of real machine perception is the root cause of the reliability problems that currently limit AI deployment in high-trust domains. The industry built consciousness first and sight never. GVRX corrects the sequence â not by replacing the cognitive layer, but by providing the perceptual ground truth it was always supposed to stand on.
+      </p>
+
+      <p class="reveal">
+        The upscaler is a proof of concept. The generative internet is an infrastructure application. The trustworthy super-resolution architecture is an integration milestone. The real product is sight itself.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       USE CASES
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content field-section field-2">
+    <div class="container">
+      <h2 class="reveal">Use Cases</h2>
+
+      <div class="use-case reveal">
+        <div class="use-case-title">Media and Entertainment</div>
+        <p>A single master asset, transmitted as its GVRX decomposition, replaces every resolution variant in the library. Content creators author once and the physics renders everywhere. With the super AI resolution architecture, streaming platforms can deliver physics-guaranteed base imagery enhanced by device-local AI â adapting perceptual quality to each screen's capability without ever fabricating content.</p>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title">Medical Imaging</div>
+        <p>Radiologists work at acquisition resolution because upscaling is untrustworthy. GVRX allows examination of fine structures at enhanced scale with a mathematical guarantee: nothing in the enhanced image was invented. With the super AI resolution architecture, AI perceptual enhancement becomes adoptable in clinical workflows because the physics layer provides an auditable reference â clinicians can see exactly where AI enhancement begins and the derived image ends. The diff layer becomes part of the diagnostic record.</p>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title">Satellite and Remote Sensing</div>
+        <p>Intelligence analysts face the same trust problem as radiologists. AI-enhanced satellite imagery is impressive and inadmissible. GVRX-enhanced imagery is provably derived from captured data, making it suitable for analysis workflows where the chain of evidence matters. National archives stored as physics descriptions reduce storage by orders of magnitude while gaining resolution-on-demand capability.</p>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title">Forensic Analysis</div>
+        <p>Enhance-and-zoom is a fiction in current digital forensics. GVRX makes it closer to fact â not by inventing detail, but by evolving the physics of what was captured to reveal structure that interpolation cannot resolve. The physics layer provides the evidentiary foundation; optional AI enhancement can be presented as a separate, clearly labeled interpretive layer with full chain-of-custody auditability.</p>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title">Archival and Cultural Heritage</div>
+        <p>Digitized artwork, historical photographs, and archival documents can be enhanced for study and display without introducing artifacts or anachronistic detail. The physics of the original medium is preserved and extended. For institutions digitizing collections, GVRX descriptions provide a future-proof format â the physics does not become obsolete when display technology advances. A Gutenberg Bible digitized today as a GVRX description can be rendered at resolutions that don't exist yet.</p>
+      </div>
+
+      <div class="use-case reveal">
+        <div class="use-case-title">AI and Machine Vision</div>
+        <p>GVRX provides the perceptual preprocessing layer for any computer vision system that requires ground-truth reliability. Autonomous vehicles, robotic surgery, industrial inspection, agricultural monitoring â any domain where AI vision currently operates on statistical pattern matching can be rebuilt on physics-based perception. The decomposition gives downstream AI systems real sight rather than sophisticated guessing.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       ARCHITECTURE
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content">
+    <div class="container">
+      <h2 class="reveal">Architecture</h2>
+
+      <p class="reveal">GVRX operates as a pipeline with three core stages and an optional fourth:</p>
+
+      <p class="reveal">
+        <strong>Decompose.</strong> Extract Soma, Neuro, Alpha, and Spirit from the source image. This is a deterministic, non-iterative computation â fast enough for real-time applications at moderate resolutions, batch-processable for large archives.
+      </p>
+
+      <p class="reveal">
+        <strong>Evolve.</strong> Apply the soliton engine through the harmonic cascade to the target resolution. Computation scales with output size and number of cascade stages. The cascade is parallelizable â each stage depends only on the previous stage's output.
+      </p>
+
+      <p class="reveal">
+        <strong>Render.</strong> Reconstitute the pixel grid from the evolved physics. This is a straightforward synthesis step that produces standard image formats at the target resolution.
+      </p>
+
+      <p class="reveal">
+        <strong>Enhance (optional).</strong> Apply AI perceptual models to the physics-derived output. The enhancement layer is constrained by the physics layer â deviations from the GVRX base are captured as a diff layer, providing full auditability. This stage is optional, device-local, and model-agnostic.
+      </p>
+
+      <p class="reveal">
+        The pipeline is stateless and deterministic. Same input, same parameters, same output â every time, on every platform. There is no random seed, no stochastic sampling, no inference-time variability.
+      </p>
+
+      <p class="reveal">
+        Integration points: REST API for cloud processing, SDK for embedded applications, CLI for batch workflows. The decomposition itself is compact â typically smaller than the original image file â making GVRX viable as both a processing pipeline and a native transmission format.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       THE DEEPER STORY
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content field-section field-3">
+    <div class="container">
+      <h2 class="reveal">The Deeper Story</h2>
+
+      <p class="reveal">
+        GVRX emerged from Paradox Field Dynamics â a geometric framework for systems where opposing forces in stable tension produce emergent structure. The same mathematics that drives the soliton engine predicts galactic rotation curves, particle mass ratios, and energy market dynamics. The image codec is one application of a theory that describes how reality organizes itself through recursive paradox.
+      </p>
+
+      <p class="reveal">
+        This matters commercially because GVRX is not an incremental improvement on existing image processing methods. It is not a better filter, a smarter algorithm, or a more efficient network. It is a different way of understanding what an image <em>is</em> â and that understanding produces capabilities that incremental approaches cannot reach. You cannot replicate the soliton engine by training a bigger model, because the engine does not come from data. It comes from physics.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       THE OPPORTUNITY
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content">
+    <div class="container">
+      <h2 class="reveal">The Opportunity</h2>
+
+      <p class="reveal">
+        The direct market for image upscaling and enhancement â Topaz, Real-ESRGAN, the competitive feature space around DLSS and FSR â is measured in single-digit billions annually. That is the smallest frame for what GVRX addresses, and it is not where the real value lies.
+      </p>
+
+      <p class="reveal">
+        The infrastructure displacement opportunity is larger by orders of magnitude. The generative internet thesis implies restructuring how visual media is stored, transmitted, and rendered globally. CDN bandwidth for resolution variants. Storage for multi-encode libraries. GPU cycles for real-time scaling. Netflix alone spends billions annually on encoding and delivery infrastructure. The global CDN market exceeds $20 billion and is growing. Cloud storage for media assets across entertainment, enterprise, government, and archival contexts is measured in hundreds of exabytes. If GVRX descriptions replace resolution-locked files as the fundamental unit of media â and the physics says they should â the addressable infrastructure is not a market segment. It is the market.
+      </p>
+
+      <p class="reveal">
+        The AI enablement layer is where the strategic value compounds. If GVRX becomes the perceptual preprocessing standard for trustworthy AI vision, it sits underneath every high-trust computer vision deployment for the foreseeable future. Autonomous vehicles cannot ship with hallucinating perception systems. Surgical robots cannot operate on AI-invented anatomy. Intelligence analysts cannot act on fabricated satellite features. The AI vision market is projected to exceed $100 billion within the decade, and the highest-value applications â the ones where errors have consequences â are currently locked out by the reliability problem that GVRX solves. The physics layer is the key that unlocks them.
+      </p>
+
+      <p class="reveal">
+        First mover dynamics in infrastructure differ fundamentally from first mover dynamics in products. Products compete on features; fast followers can catch up or leapfrog. Infrastructure competes on adoption; once a standard is established, it becomes the substrate everything else builds on. If GVRX becomes the format that major media companies transmit, that government archives store, that medical imaging systems preprocess through, that AI vision pipelines ingest â then GVRX is not a product competing in a market. It is the market.
+      </p>
+
+      <p class="reveal">
+        The moat is both theoretical and structural. The theoretical moat: the decomposition derives from physics that took decades to develop and cannot be replicated by scaling data or compute. The structural moat: every integration reinforces the standard. Every asset converted to GVRX description is an asset that renders through GVRX physics. Every AI system trained on GVRX-preprocessed images is a system that depends on GVRX perception. Network effects in infrastructure are cumulative and durable.
+      </p>
+
+      <p class="reveal">
+        The timing is not accidental. AI vision has reached its trust ceiling â multimodal models are powerful but unreliable, and the industry knows hallucination is the barrier to high-value deployment. Resolution proliferation is accelerating â 4K is baseline, 8K is arriving, and device diversity spans watches to stadium displays. The brute-force approach of storing every resolution variant is hitting scaling limits at exactly the moment when the generative architecture alternative becomes viable. The market has been primed by the generative AI moment to understand that describing and instantiating can replace storing and retrieving.
+      </p>
+
+      <p class="reveal">
+        GVRX arrives when the need is acute, the concept is legible, and the alternatives are failing.
+      </p>
+
+      <p class="pull-quote reveal">This is what Ã is holding. Not an upscaler. Not a codec. A physics-based perception layer that can become infrastructure â for media, for AI, for the way machines see.</p>
+
+      <p class="reveal">
+        The window for establishing that infrastructure is open now and will not stay open indefinitely. The first physics-based perception standard to achieve critical adoption becomes the standard. There is no reason for a second one.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       ABOUT
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="section-content" style="padding-bottom: 3rem;">
+    <div class="container">
+      <h2 class="reveal">About</h2>
+
+      <p class="reveal">
+        GVRX is developed by The Impossible Outcomes Company, a division of Ã Co., founded by Chris Sojka.
+      </p>
+    </div>
+  </section>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       FOOTER
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <footer class="footer">
+    <img src="assets/logos/Impossible Work Mark_White.png" alt="The Impossible Outcomes Company" class="footer-logo">
+    <p class="footer-text">
+      Technical White Paper â February 2026
+    </p>
+    <p class="footer-closing reveal">"The image is humming the melody of its physics, always."</p>
+  </footer>
+
+  <!-- âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+       JAVASCRIPT
+       âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <script>
+    // Intersection Observer for reveal animations
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Nav scroll behavior
+    const nav = document.getElementById('nav');
+
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 100) {
+        nav.classList.add('scrolled');
+      } else {
+        nav.classList.remove('scrolled');
+      }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  </script>
+
 </body>
 </html>
+
